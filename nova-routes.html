@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="diagrammer 0.6.0">
+<meta name="diagram-type" content="workflow">
+<meta name="diagram-sha256" content="85d4d24792e8706ec98ea30ee2e95678ff590b66116d579beb6a3c9693e0fc7c">
+<title>Nova Voice Assistant — Route Navigation</title>
+<style>:root{--bg:#f6f8fa;--panel:#ffffff;--fg:#1f2328;--muted:#59636e;--border:#d0d7de;--btn:#f6f8fa;--btn-hover:#eaeef2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#010409;--panel:#0d1117;--fg:#e6edf3;--muted:#9198a1;--border:#3d444d;--btn:#21262d;--btn-hover:#30363d}}
+:root[data-theme="dark"]{--bg:#010409;--panel:#0d1117;--fg:#e6edf3;--muted:#9198a1;--border:#3d444d;--btn:#21262d;--btn-hover:#30363d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;justify-content:space-between;padding:20px 16px 12px;max-width:1400px;margin:0 auto}
+h1{margin:0;font-size:20px}header p{margin:4px 0 0;color:var(--muted);max-width:70ch}
+.tools{display:flex;gap:8px}button{font:inherit;font-size:13px;color:var(--fg);background:var(--btn);border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer}
+button:hover{background:var(--btn-hover)}button:focus-visible{outline:2px solid #4493f8;outline-offset:2px}
+main{max-width:1400px;margin:0 auto;padding:0 16px 24px}.canvas{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:auto;padding:8px}
+.ex-page header,.ex-page main{max-width:1100px}
+.conclusion{background:var(--panel);border:1px solid var(--border);border-left:4px solid #4493f8;border-radius:10px;padding:16px 20px;margin-bottom:16px}
+.conclusion .eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.conclusion p{margin:4px 0 0;font-size:19px;line-height:1.45;font-weight:500}
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 18px;min-width:0}
+.panel.wide{grid-column:1/-1}.panel h2{margin:0 0 8px;font-size:16px}.panel p{margin:0 0 8px}.panel p:last-child{margin-bottom:0}
+.panel ul,.panel ol{margin:0;padding-left:20px}.panel li{margin:4px 0}.panel li span{color:var(--muted)}
+.panel .canvas{border:0;padding:0}
+.callout.t-info{border-left:4px solid #4493f8}.callout.t-success{border-left:4px solid #10b981}.callout.t-warning{border-left:4px solid #d97706}.callout.t-risk{border-left:4px solid #ef4444}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);vertical-align:top}th{color:var(--muted);font-weight:600}
+.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
+.option{border:1px solid var(--border);border-radius:8px;padding:10px 14px}.option h3{margin:0 0 6px;font-size:15px}
+.option ul{list-style:none;padding:0;margin:0 0 6px}.option li{padding-left:20px;position:relative}
+.pros li::before{content:"+";position:absolute;left:4px;color:#10b981;font-weight:700}.cons li::before{content:"\2212";position:absolute;left:4px;color:#ef4444;font-weight:700}
+.verdict{font-weight:600;margin:6px 0 0}
+/* Viewer chrome: zoom bar, pan, focus highlighting and the inspector panel. */
+.canvas{max-height:calc(100vh - 190px);overflow:auto;position:relative}
+.canvas svg{display:block;margin:0 auto;max-width:none}
+.canvas.pannable{cursor:grab}.canvas.panning{cursor:grabbing;user-select:none}
+.zoombar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px}
+.zoombar button{min-width:34px;padding:3px 10px}
+.zoom-level{min-width:44px;text-align:center;font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.zoom-hint{font-size:12px;color:var(--muted);margin-left:6px}
+
+/* Focus: dim everything, then light the item, its upstream (amber) and downstream (green). */
+.dg [tabindex]{cursor:pointer;outline:none}
+.dg.has-focus :is(.node,.edge,.msg,.event,.span){opacity:.16;transition:opacity .15s}
+.dg.has-focus .group{opacity:.45}
+.dg.has-focus :is(.is-focus,.is-up,.is-down){opacity:1}
+.dg :is(.node,.msg,.event,.span):focus-visible{outline:3px solid #4493f8;outline-offset:4px}
+.dg .is-focus :is(.shape,.frame){stroke-width:3.2}
+.dg .is-focus .bar{stroke:var(--fg);stroke-width:1.5}
+.dg .is-focus .ebox{stroke-width:2.4}
+.dg .node.is-up :is(.shape,.frame),.dg .span.is-up .bar{stroke:#d97706;stroke-width:2.6}
+.dg .node.is-down :is(.shape,.frame),.dg .span.is-down .bar{stroke:#16a34a;stroke-width:2.6}
+.dg .edge.is-up path:not(.flow),.dg .msg.is-up path:not(.flow){stroke:#d97706;stroke-width:2.6}
+.dg .edge.is-down path:not(.flow),.dg .msg.is-down path:not(.flow){stroke:#16a34a;stroke-width:2.6}
+.dg :is(.edge,.msg).is-up .elabel text,.dg .msg.is-up text{fill:#b45309;font-weight:600}
+.dg :is(.edge,.msg).is-down .elabel text,.dg .msg.is-down text{fill:#15803d;font-weight:600}
+.dg.dark :is(.edge,.msg).is-up .elabel text,.dg.dark .msg.is-up text{fill:#fbbf24}
+.dg.dark :is(.edge,.msg).is-down .elabel text,.dg.dark .msg.is-down text{fill:#4ade80}
+
+.inspector{position:fixed;right:16px;bottom:16px;z-index:10;width:min(360px,calc(100vw - 32px));max-height:min(70vh,560px);overflow:auto;
+  background:var(--panel);color:var(--fg);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);padding:14px 16px;font-size:14px}
+.inspector.pinned{border-color:#4493f8}
+.insp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.insp-head strong{font-size:16px;line-height:1.3;word-break:break-word}
+.insp-close{border:0;background:none;font-size:20px;line-height:1;padding:0 4px;color:var(--muted)}
+.inspector .desc{margin:8px 0 0;color:var(--muted)}
+.inspector dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:10px 0 0}
+.inspector dt{color:var(--muted)}.inspector dd{margin:0;word-break:break-word}
+.inspector h3{font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin:14px 0 6px;color:var(--muted)}
+.inspector .count{display:inline-block;min-width:20px;padding:0 6px;border-radius:10px;background:var(--btn);text-align:center;color:var(--fg)}
+.inspector ul{list-style:none;margin:0;padding:0}.inspector li{margin:4px 0;padding-left:10px;border-left:3px solid var(--border)}
+.inspector ul.up li{border-left-color:#d97706}.inspector ul.down li{border-left-color:#16a34a}
+.inspector li button{padding:2px 8px;font-size:13px;text-align:left}
+.inspector .via{color:var(--muted);font-size:12.5px}
+.inspector .none{margin:0;color:var(--muted)}
+.insp-hint{margin:12px 0 0;font-size:12px;color:var(--muted)}
+@media (max-width:600px){.inspector{right:8px;left:8px;bottom:8px;width:auto;max-height:55vh}.zoom-hint{display:none}}
+</style>
+</head>
+<body>
+<header><div><h1>Nova Voice Assistant — Route Navigation</h1><p>All client-side tab routes and the in-app navigation triggers that move between them. Navigation is driven by go(tab) from AppShell; there is no router library.</p></div>
+<div class="tools"><button id="theme" type="button" aria-label="Toggle dark or light theme">Theme</button><button id="motion" type="button" aria-pressed="false">Motion: off</button><button id="svg" type="button">SVG</button><button id="png" type="button">PNG</button></div></header>
+<main><div class="canvas"><svg xmlns="http://www.w3.org/2000/svg" class="dg" viewBox="-24 -92 1338.9 1144.8" width="1338.9" height="1144.8" role="img" aria-label="Nova Voice Assistant — Route Navigation"><title>Nova Voice Assistant — Route Navigation</title><style>
+.dg{--bg:#ffffff;--fg:#1f2328;--muted:#59636e;--line:#6e7781;--fill:#f6f8fa;--group:#eef1f5;--group-line:#c4ccd5;--label-bg:#ffffff;--error:#cf222e;--accent:#0969da;
+font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.dg.dark{--bg:#0d1117;--fg:#e6edf3;--muted:#9198a1;--line:#8b949e;--fill:#161b22;--group:#151b23;--group-line:#3d444d;--label-bg:#0d1117;--error:#f85149;--accent:#4493f8}
+.dg .bg{fill:var(--bg)}
+.dg .title{fill:var(--fg);font-size:18px;font-weight:600}
+.dg .node .shape{fill:var(--fill);stroke:var(--kc,var(--accent));stroke-width:1.6}
+.dg .node .shape-detail{fill:none;stroke:var(--kc,var(--accent));stroke-width:1.2}
+.dg .node.k-external .shape{stroke-dasharray:5 4}
+.dg .node.k-wait .shape,.dg .node.k-manual .shape{stroke-dasharray:3 3}
+.dg .label{fill:var(--fg);font-size:13px;text-anchor:middle;dominant-baseline:central}
+.dg .kind{fill:color-mix(in srgb,var(--kc,var(--accent)) 60%,var(--fg));font-size:10px;font-weight:600;letter-spacing:.08em;text-anchor:middle;dominant-baseline:central;text-transform:uppercase}
+.dg .group rect{fill:var(--group);stroke:var(--group-line);stroke-width:1.2}
+.dg .group text{fill:var(--muted);font-size:12px;font-weight:600}
+.dg .edge path{fill:none;stroke:var(--line);stroke-width:1.5}
+.dg .edge.s-async path,.dg .edge.s-retry path,.dg .msg.m-return line,.dg .msg.m-return path{stroke-dasharray:6 4}
+.dg .edge.s-data path{stroke-width:2.6}
+.dg .edge.s-error path{stroke:var(--error)}
+.dg .arrowhead{fill:var(--line)}
+.dg .arrowhead-open{fill:none;stroke:var(--line);stroke-width:1.4}
+.dg .hollow{fill:var(--bg);stroke:var(--line);stroke-width:1.3}
+.dg .edge.s-dependency path,.dg .edge.s-realization path{stroke-dasharray:6 4}
+.dg .tbl .frame{fill:var(--fill);stroke:var(--kc,var(--accent));stroke-width:1.6}
+.dg .tbl .head{fill:var(--kc,var(--accent));fill-opacity:.14}
+.dg .tbl .sep{stroke:var(--group-line);stroke-width:1}
+.dg .tbl .tname{fill:var(--fg);font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.dg .tbl .tname.abstract{font-style:italic}
+.dg .tbl .stereo{fill:var(--muted);font-size:10.5px;text-anchor:middle;dominant-baseline:central}
+.dg .tbl .tcol{fill:var(--fg);font-size:12px;dominant-baseline:central}
+.dg .tbl .ttype{fill:var(--muted);font-size:11.5px;text-anchor:end;dominant-baseline:central}
+.dg .tbl .tkey{fill:color-mix(in srgb,var(--kc,var(--accent)) 60%,var(--fg));font-size:10px;font-weight:700;dominant-baseline:central}
+.dg .elabel rect{fill:var(--label-bg);opacity:.92}
+.dg .elabel text{fill:var(--muted);font-size:11.5px;text-anchor:middle;dominant-baseline:central}
+.dg .lifeline{stroke:var(--group-line);stroke-width:1.2;stroke-dasharray:4 4}
+.dg .msg line,.dg .msg path{fill:none;stroke:var(--line);stroke-width:1.5}
+.dg .msg text{fill:var(--fg);font-size:12px;text-anchor:middle}
+.dg .frag rect.box{fill:none;stroke:var(--group-line);stroke-width:1.2}
+.dg .frag rect.tab{fill:var(--group);stroke:var(--group-line);stroke-width:1.2}
+.dg .frag text{fill:var(--muted);font-size:11px}
+.dg .frag text.op{font-weight:700;fill:var(--fg)}
+.k-service,.k-task{--kc:#3b82f6}.k-database{--kc:#8b5cf6}.k-queue{--kc:#d97706}.k-cache{--kc:#ef4444}.k-storage{--kc:#10b981}
+.k-client,.k-actor{--kc:#0ea5e9}.k-gateway{--kc:#6366f1}.k-function,.k-tool{--kc:#f97316}.k-external{--kc:#6b7280}
+.k-start{--kc:#10b981}.k-end{--kc:#6b7280}.k-decision{--kc:#d97706}.k-wait{--kc:#8b5cf6}.k-manual{--kc:#0ea5e9}
+.k-source{--kc:#0ea5e9}.k-process{--kc:#3b82f6}.k-store{--kc:#8b5cf6}.k-sink{--kc:#10b981}
+.k-initial{--kc:#10b981}.k-state{--kc:#3b82f6}.k-waiting{--kc:#8b5cf6}.k-error{--kc:#ef4444}.k-final{--kc:#6b7280}
+.k-item{--kc:#3b82f6}.k-folder{--kc:#d97706}.k-file{--kc:#6b7280}.k-module{--kc:#6366f1}.k-feature{--kc:#10b981}.k-team{--kc:#0ea5e9}.k-person{--kc:#f97316}
+.k-entity,.k-class{--kc:#3b82f6}.k-interface{--kc:#10b981}.k-abstract{--kc:#8b5cf6}.k-enum{--kc:#d97706}
+.dg .node.k-waiting .shape{stroke-dasharray:3 3}
+.dg .axis{stroke:var(--line);stroke-width:1.2}
+.dg .grid{stroke:var(--group-line);stroke-width:1;stroke-dasharray:2 4}
+.dg .tick{fill:var(--muted);font-size:11px;text-anchor:middle}
+.dg .zone{fill:var(--muted);font-size:10.5px;text-anchor:end}
+.dg .lane{stroke:var(--group-line);stroke-width:1.4}
+.dg .lane-label{fill:var(--fg);font-size:12px;font-weight:600;dominant-baseline:central}
+.dg .event .leader{stroke:var(--kc);stroke-width:1.2}
+.dg .event .dot{fill:var(--kc);stroke:var(--bg);stroke-width:2}
+.dg .event .ebox{fill:var(--fill);stroke:var(--kc);stroke-width:1.2}
+.dg .event .etime{fill:var(--muted);font-size:10.5px}
+.dg .event .elabel-t{fill:var(--fg);font-size:12px}
+.dg .period rect{fill:var(--kc);fill-opacity:.1}
+.dg .period text{fill:color-mix(in srgb,var(--kc) 60%,var(--fg));font-size:11px;font-weight:600}
+.dg .stripe{fill:var(--group);opacity:.6}
+.dg .span .slabel{fill:var(--fg);font-size:12px;dominant-baseline:central}
+.dg .span .bar{fill:var(--kc);fill-opacity:.8}
+.dg .span.error .bar{stroke:var(--error);stroke-width:2;fill-opacity:.45}
+.dg .span .sdur{fill:var(--muted);font-size:11px;dominant-baseline:central}
+.k-info{--kc:#6b7280}.k-change{--kc:#3b82f6}.k-alert{--kc:#d97706}.k-incident{--kc:#ef4444}.k-fix{--kc:#10b981}.k-milestone{--kc:#8b5cf6}
+.k-maintenance{--kc:#6366f1}.k-window{--kc:#0ea5e9}.k-request{--kc:#3b82f6}.k-compute{--kc:#f97316}.k-db{--kc:#8b5cf6}.k-llm{--kc:#6366f1}
+.dg .flow{fill:none!important;stroke:var(--fc,var(--accent))!important;stroke-width:4.5!important;stroke-dasharray:0 30!important;stroke-linecap:round;opacity:0}
+.dg .s-error .flow{--fc:var(--error)}
+.dg.live .flow{opacity:.85;animation:dg-flow 1.3s linear infinite}
+.dg.live .anim{animation:dg-in .45s ease-out both;animation-delay:calc(var(--i,0) * 110ms)}
+.dg.live .span .bar{transform-box:fill-box;transform-origin:left;animation:dg-grow .6s ease-out both;animation-delay:calc(var(--i,0) * 80ms)}
+@keyframes dg-flow{to{stroke-dashoffset:-30}}
+@keyframes dg-in{from{opacity:0;transform:translateY(6px)}}
+@keyframes dg-grow{from{transform:scaleX(0)}}
+@media (prefers-reduced-motion:reduce){.dg.live .flow,.dg.live .anim,.dg.live .span .bar{animation:none}}
+</style><defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"/></marker>
+<marker id="arrow-open" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10" class="arrowhead-open"/></marker>
+<marker id="one" viewBox="0 0 12 12" refX="12" refY="6" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M6,1 L6,11 M0,6 L12,6" class="arrowhead-open"/></marker>
+<marker id="many" viewBox="0 0 12 12" refX="12" refY="6" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M0,6 L12,1 M0,6 L12,6 M0,6 L12,11 M2,1 L2,11" class="arrowhead-open"/></marker>
+<marker id="triangle" viewBox="0 0 12 12" refX="12" refY="6" markerWidth="13" markerHeight="13" orient="auto-start-reverse"><path d="M0,0 L12,6 L0,12 z" class="hollow"/></marker>
+<marker id="diamond" viewBox="0 0 16 10" refX="16" refY="5" markerWidth="16" markerHeight="10" orient="auto-start-reverse"><path d="M0,5 L8,0 L16,5 L8,10 z" class="arrowhead"/></marker>
+<marker id="diamond-open" viewBox="0 0 16 10" refX="16" refY="5" markerWidth="16" markerHeight="10" orient="auto-start-reverse"><path d="M0,5 L8,0 L16,5 L8,10 z" class="hollow"/></marker>
+</defs><rect class="bg" x="-24" y="-92" width="1338.9" height="1144.8"/><text class="title" x="0" y="-50">Nova Voice Assistant — Route Navigation</text><g class="group" data-id="nav"><rect x="0" y="-24" width="419.6" height="1026.5" rx="10"/><text x="12" y="-8">Navigation Shell</text></g><g class="group" data-id="tab_assistant"><rect x="563.6" y="381.5" width="727.3" height="361.3" rx="10"/><text x="575.6" y="397.5">assistant tab</text></g><g class="group" data-id="tab_pipeline"><rect x="563.6" y="885.8" width="727.3" height="143" rx="10"/><text x="575.6" y="901.8">pipeline tab</text></g><g class="group" data-id="tab_neural"><rect x="563.6" y="742.8" width="727.3" height="143" rx="10"/><text x="575.6" y="758.8">neural tab</text></g><g class="group" data-id="tab_learn"><rect x="563.6" y="-24" width="727.3" height="262" rx="10"/><text x="575.6" y="-8">learn tab</text></g><g class="group" data-id="tab_settings"><rect x="563.6" y="238" width="727.3" height="143.5" rx="10"/><text x="575.6" y="254">settings tab</text></g><g class="edge s-normal" data-from="start" data-to="tab_decision"><path d="M137.5,574 Q173.5,574 191.5,574 L209.5,574" marker-end="url(#arrow)"/><path class="flow" d="M137.5,574 Q173.5,574 191.5,574 L209.5,574"/></g><g class="edge s-normal" data-from="tab_decision" data-to="view_assistant"><path d="M383.6,593.8 Q419.6,602 455.6,602 Q491.6,602 527.6,602 Q563.6,602 587.1,602 L610.5,602" marker-end="url(#arrow)"/><path class="flow" d="M383.6,593.8 Q419.6,602 455.6,602 Q491.6,602 527.6,602 Q563.6,602 587.1,602 L610.5,602"/><g class="elabel"><rect x="455.6" y="592" width="72" height="20" rx="4"/><text x="491.6" y="602">assistant</text></g></g><g class="edge s-normal" data-from="tab_decision" data-to="view_pipeline"><path d="M307.5,609 Q419.6,966.8 455.6,966.8 Q491.6,966.8 527.6,966.8 Q563.6,966.8 587.1,966.8 L610.5,966.8" marker-end="url(#arrow)"/><path class="flow" d="M307.5,609 Q419.6,966.8 455.6,966.8 Q491.6,966.8 527.6,966.8 Q563.6,966.8 587.1,966.8 L610.5,966.8"/><g class="elabel"><rect x="458.9" y="956.8" width="65.5" height="20" rx="4"/><text x="491.6" y="966.8">pipeline</text></g></g><g class="edge s-normal" data-from="tab_decision" data-to="view_neural"><path d="M313.8,609 Q419.6,823.8 455.6,823.8 Q491.6,823.8 527.6,823.8 Q563.6,823.8 581.6,823.8 L599.6,823.8" marker-end="url(#arrow)"/><path class="flow" d="M313.8,609 Q419.6,823.8 455.6,823.8 Q491.6,823.8 527.6,823.8 Q563.6,823.8 581.6,823.8 L599.6,823.8"/><g class="elabel"><rect x="465.3" y="813.8" width="52.6" height="20" rx="4"/><text x="491.6" y="823.8">neural</text></g></g><g class="edge s-normal" data-from="tab_decision" data-to="view_learn"><path d="M306.8,539 Q419.6,153 455.6,153 Q491.6,153 527.6,153 Q563.6,153 594.3,153 L625.1,153" marker-end="url(#arrow)"/><path class="flow" d="M306.8,539 Q419.6,153 455.6,153 Q491.6,153 527.6,153 Q563.6,153 594.3,153 L625.1,153"/><g class="elabel"><rect x="468.5" y="143" width="46.2" height="20" rx="4"/><text x="491.6" y="153">learn</text></g></g><g class="edge s-normal" data-from="tab_decision" data-to="view_settings"><path d="M313.4,539 Q419.6,318 455.6,318 Q491.6,318 527.6,318 Q563.6,318 596.2,318 L628.7,318" marker-end="url(#arrow)"/><path class="flow" d="M313.4,539 Q419.6,318 455.6,318 Q491.6,318 527.6,318 Q563.6,318 596.2,318 L628.7,318"/><g class="elabel"><rect x="458.9" y="308" width="65.5" height="20" rx="4"/><text x="491.6" y="318">settings</text></g></g><g class="edge s-normal" data-from="view_assistant" data-to="assist_history"><path d="M750.2,580 Q934.5,507.8 1018.5,494.9 L1102.4,482" marker-end="url(#arrow)"/><path class="flow" d="M750.2,580 Q934.5,507.8 1018.5,494.9 L1102.4,482"/><g class="elabel"><rect x="888.9" y="497.8" width="91.3" height="20" rx="4"/><text x="934.5" y="507.8">history icon</text></g></g><g class="edge s-normal" data-from="assist_history" data-to="view_assistant"><path d="M1102.4,466.8 Q934.5,453.5 832.1,516.8 L729.7,580" marker-end="url(#arrow)"/><path class="flow" d="M1102.4,466.8 Q934.5,453.5 832.1,516.8 L729.7,580"/><g class="elabel"><rect x="888.9" y="443.5" width="91.3" height="20" rx="4"/><text x="934.5" y="453.5">close drawer</text></g></g><g class="edge s-normal" data-from="view_assistant" data-to="assist_to_settings"><path d="M777.6,602 Q934.5,602 1016.6,590.9 L1098.8,579.8" marker-end="url(#arrow)"/><path class="flow" d="M777.6,602 Q934.5,602 1016.6,590.9 L1098.8,579.8"/><g class="elabel"><rect x="824.5" y="592" width="220.1" height="20" rx="4"/><text x="934.5" y="602">⚙ settings icon / voice settings</text></g></g><g class="edge s-normal" data-from="assist_to_settings" data-to="tab_decision"><path d="M1098.8,562 Q934.5,541.8 814.3,541.8 Q694,541.8 628.8,541.8 Q563.6,541.8 527.6,541.8 Q491.6,541.8 455.6,541.8 Q419.6,541.8 401.6,546.5 L383.6,551.2" marker-end="url(#arrow)"/><path class="flow" d="M1098.8,562 Q934.5,541.8 814.3,541.8 Q694,541.8 628.8,541.8 Q563.6,541.8 527.6,541.8 Q491.6,541.8 455.6,541.8 Q419.6,541.8 401.6,546.5 L383.6,551.2"/></g><g class="edge s-normal" data-from="view_assistant" data-to="assist_to_pipeline"><path d="M750.6,624 Q934.5,695.5 1016.6,689.5 L1098.8,683.5" marker-end="url(#arrow)"/><path class="flow" d="M750.6,624 Q934.5,695.5 1016.6,689.5 L1098.8,683.5"/><g class="elabel"><rect x="830.9" y="685.5" width="207.2" height="20" rx="4"/><text x="934.5" y="695.5">Open pipeline / Explore stages</text></g></g><g class="edge s-normal" data-from="assist_to_pipeline" data-to="tab_decision"><path d="M1098.8,672.4 Q934.5,658 814.3,658 Q694,658 628.8,658 Q563.6,658 527.6,658 Q491.6,658 455.6,658 Q419.6,658 383.7,633.5 L347.9,609" marker-end="url(#arrow)"/><path class="flow" d="M1098.8,672.4 Q934.5,658 814.3,658 Q694,658 628.8,658 Q563.6,658 527.6,658 Q491.6,658 455.6,658 Q419.6,658 383.7,633.5 L347.9,609"/></g><g class="edge s-normal" data-from="view_pipeline" data-to="pipeline_micdock"><path d="M777.6,972.7 Q934.5,983.8 1009.4,978.3 L1084.2,972.8" marker-end="url(#arrow)"/><path class="flow" d="M777.6,972.7 Q934.5,983.8 1009.4,978.3 L1084.2,972.8"/><g class="elabel"><rect x="885.7" y="973.8" width="97.7" height="20" rx="4"/><text x="934.5" y="983.8">mic fab shown</text></g></g><g class="edge s-normal" data-from="pipeline_micdock" data-to="view_pipeline"><path d="M1084.2,960.7 Q934.5,949.8 856,955.3 L777.6,960.8" marker-end="url(#arrow)"/><path class="flow" d="M1084.2,960.7 Q934.5,949.8 856,955.3 L777.6,960.8"/></g><g class="edge s-normal" data-from="view_neural" data-to="neural_micdock"><path d="M788.5,830.4 Q934.5,840.8 1009.4,835.3 L1084.2,829.8" marker-end="url(#arrow)"/><path class="flow" d="M788.5,830.4 Q934.5,840.8 1009.4,835.3 L1084.2,829.8"/><g class="elabel"><rect x="885.7" y="830.8" width="97.7" height="20" rx="4"/><text x="934.5" y="840.8">mic fab shown</text></g></g><g class="edge s-normal" data-from="neural_micdock" data-to="view_neural"><path d="M1084.2,817.7 Q934.5,806.8 861.5,811.9 L788.5,817.1" marker-end="url(#arrow)"/><path class="flow" d="M1084.2,817.7 Q934.5,806.8 861.5,811.9 L788.5,817.1"/></g><g class="edge s-normal" data-from="view_learn" data-to="learn_micdock"><path d="M763,164.6 Q934.5,193.5 1009.4,186 L1084.2,178.4" marker-end="url(#arrow)"/><path class="flow" d="M763,164.6 Q934.5,193.5 1009.4,186 L1084.2,178.4"/><g class="elabel"><rect x="885.7" y="183.5" width="97.7" height="20" rx="4"/><text x="934.5" y="193.5">mic fab shown</text></g></g><g class="edge s-normal" data-from="learn_micdock" data-to="view_learn"><path d="M1084.2,160.3 Q934.5,143 848.8,146.6 L763,150.1" marker-end="url(#arrow)"/><path class="flow" d="M1084.2,160.3 Q934.5,143 848.8,146.6 L763,150.1"/></g><g class="edge s-normal" data-from="view_learn" data-to="learn_to_assistant"><path d="M763,140.4 Q934.5,109 1007.5,96.5 L1080.6,84" marker-end="url(#arrow)"/><path class="flow" d="M763,140.4 Q934.5,109 1007.5,96.5 L1080.6,84"/><g class="elabel"><rect x="895.3" y="99" width="78.4" height="20" rx="4"/><text x="934.5" y="109">Ask Nova →</text></g></g><g class="edge s-normal" data-from="learn_to_assistant" data-to="tab_decision"><path d="M1080.6,65.1 Q934.5,58.5 814.3,58.5 Q694,58.5 628.8,58.5 Q563.6,58.5 527.6,58.5 Q491.6,58.5 455.6,58.5 Q419.6,58.5 362.3,298.8 L304.9,539" marker-end="url(#arrow)"/><path class="flow" d="M1080.6,65.1 Q934.5,58.5 814.3,58.5 Q694,58.5 628.8,58.5 Q563.6,58.5 527.6,58.5 Q491.6,58.5 455.6,58.5 Q419.6,58.5 362.3,298.8 L304.9,539"/></g><g class="edge s-normal" data-from="view_settings" data-to="settings_micdock"><path d="M759.4,323 Q934.5,336.5 1009.4,330.6 L1084.2,324.6" marker-end="url(#arrow)"/><path class="flow" d="M759.4,323 Q934.5,336.5 1009.4,330.6 L1084.2,324.6"/><g class="elabel"><rect x="885.7" y="326.5" width="97.7" height="20" rx="4"/><text x="934.5" y="336.5">mic fab shown</text></g></g><g class="edge s-normal" data-from="settings_micdock" data-to="view_settings"><path d="M1084.2,312.4 Q934.5,302.5 846.9,308.1 L759.4,313.8" marker-end="url(#arrow)"/><path class="flow" d="M1084.2,312.4 Q934.5,302.5 846.9,308.1 L759.4,313.8"/></g><g class="node anim k-start" style="--i:0" data-id="start"><title>useState(&#39;assistant&#39;) — default route is Assistant tab</title><rect class="shape" x="36" y="552" width="101.5" height="44" rx="22"/><text class="label" x="86.8" y="574">App loads</text></g><g class="node anim k-decision" style="--i:1" data-id="tab_decision"><title>AppShell renders the matching view based on current tab state</title><polygon class="shape" points="296.6,539 383.6,574 296.6,609 209.5,574"/><text class="label" x="296.6" y="574">Active tab?</text></g><g class="node anim k-task" style="--i:2" data-id="view_assistant"><title>Main chat UI: transcript, response, suggestions, inline pipeline stepper</title><rect class="shape" x="610.5" y="580" width="167" height="44" rx="8"/><text class="label" x="694" y="602">AssistantDashboard</text></g><g class="node anim k-task" style="--i:3" data-id="assist_history"><title>Slide-over drawer showing conversation history — stays on assistant tab</title><rect class="shape" x="1102.4" y="444" width="130.6" height="56" rx="8"/><text class="label" x="1167.7" y="463.5">HistoryDrawer</text><text class="label" x="1167.7" y="480.5">(overlay)</text></g><g class="node anim k-tool" style="--i:3" data-id="assist_to_settings"><title>Triggered by AssistantHeader settings icon or Composer voice-settings button</title><rect class="shape" x="1098.8" y="544" width="137.9" height="53" rx="8"/><text class="kind" x="1167.7" y="560">tool</text><text class="label" x="1167.7" y="577.5">go(&#39;settings&#39;)</text></g><g class="node anim k-tool" style="--i:3" data-id="assist_to_pipeline"><title>Triggered by RequestTrace &#39;Open pipeline&#39; link and Pipeline stepper &#39;Explore&#39; arrow</title><rect class="shape" x="1098.8" y="652" width="137.9" height="53" rx="8"/><text class="kind" x="1167.7" y="668">tool</text><text class="label" x="1167.7" y="685.5">go(&#39;pipeline&#39;)</text></g><g class="node anim k-task" style="--i:2" data-id="view_pipeline"><title>All 8 live pipeline stages: Voice → STT → Text → Tokens → LLM → Generation → TTS → Audio</title><rect class="shape" x="610.5" y="944.8" width="167" height="44" rx="8"/><text class="label" x="694" y="966.8">ProcessingPipeline</text></g><g class="node anim k-task" style="--i:3" data-id="pipeline_micdock"><title>Floating mic button — available on all non-assistant tabs</title><rect class="shape" x="1084.2" y="944.8" width="167" height="44" rx="8"/><text class="label" x="1167.7" y="966.8">MicDock (floating)</text></g><g class="node anim k-task" style="--i:2" data-id="view_neural"><title>Attention visualiser, token probability bars, network diagram — uses live logprobs</title><rect class="shape" x="599.6" y="801.8" width="188.9" height="44" rx="8"/><text class="label" x="694" y="823.8">NeuralNetworkExplorer</text></g><g class="node anim k-task" style="--i:3" data-id="neural_micdock"><title>Floating mic button</title><rect class="shape" x="1084.2" y="801.8" width="167" height="44" rx="8"/><text class="label" x="1167.7" y="823.8">MicDock (floating)</text></g><g class="node anim k-task" style="--i:2" data-id="view_learn"><title>Educational content explaining how LLMs work, with &#39;Try asking Nova&#39; CTA</title><rect class="shape" x="625.1" y="131" width="137.9" height="44" rx="8"/><text class="label" x="694" y="153">LearningCenter</text></g><g class="node anim k-tool" style="--i:3" data-id="learn_to_assistant"><title>onAsk() prop — fires when user clicks &#39;Ask Nova&#39; in LearningCenter</title><rect class="shape" x="1080.6" y="34" width="174.3" height="70" rx="8"/><text class="kind" x="1167.7" y="50">tool</text><text class="label" x="1167.7" y="67.5">go(&#39;assistant&#39;) via</text><text class="label" x="1167.7" y="84.5">onAsk()</text></g><g class="node anim k-task" style="--i:3" data-id="learn_micdock"><title>Floating mic button</title><rect class="shape" x="1084.2" y="148" width="167" height="44" rx="8"/><text class="label" x="1167.7" y="170">MicDock (floating)</text></g><g class="node anim k-task" style="--i:2" data-id="view_settings"><title>Configure Ollama base URL, model, voice URI, rate, autoSpeak, think mode, pacing</title><rect class="shape" x="628.7" y="296" width="130.6" height="44" rx="8"/><text class="label" x="694" y="318">ModelSettings</text></g><g class="node anim k-task" style="--i:3" data-id="settings_micdock"><title>Floating mic button</title><rect class="shape" x="1084.2" y="296" width="167" height="44" rx="8"/><text class="label" x="1167.7" y="318">MicDock (floating)</text></g></svg></div></main>
+<script type="application/json" id="diagram-source">{"meta":{"title":"Nova Voice Assistant — Route Navigation","description":"All client-side tab routes and the in-app navigation triggers that move between them. Navigation is driven by go(tab) from AppShell; there is no router library.","direction":"LR"},"groups":[{"id":"nav","label":"Navigation Shell","kind":"system"},{"id":"tab_assistant","label":"assistant tab","kind":"phase"},{"id":"tab_pipeline","label":"pipeline tab","kind":"phase"},{"id":"tab_neural","label":"neural tab","kind":"phase"},{"id":"tab_learn","label":"learn tab","kind":"phase"},{"id":"tab_settings","label":"settings tab","kind":"phase"}],"steps":[{"id":"start","label":"App loads","kind":"start","group":"nav","description":"useState('assistant') — default route is Assistant tab"},{"id":"tab_decision","label":"Active tab?","kind":"decision","group":"nav","description":"AppShell renders the matching view based on current tab state"},{"id":"view_assistant","label":"AssistantDashboard","kind":"task","group":"tab_assistant","description":"Main chat UI: transcript, response, suggestions, inline pipeline stepper"},{"id":"assist_history","label":"HistoryDrawer (overlay)","kind":"task","group":"tab_assistant","description":"Slide-over drawer showing conversation history — stays on assistant tab"},{"id":"assist_to_settings","label":"go('settings')","kind":"tool","group":"tab_assistant","description":"Triggered by AssistantHeader settings icon or Composer voice-settings button"},{"id":"assist_to_pipeline","label":"go('pipeline')","kind":"tool","group":"tab_assistant","description":"Triggered by RequestTrace 'Open pipeline' link and Pipeline stepper 'Explore' arrow"},{"id":"view_pipeline","label":"ProcessingPipeline","kind":"task","group":"tab_pipeline","description":"All 8 live pipeline stages: Voice → STT → Text → Tokens → LLM → Generation → TTS → Audio"},{"id":"pipeline_micdock","label":"MicDock (floating)","kind":"task","group":"tab_pipeline","description":"Floating mic button — available on all non-assistant tabs"},{"id":"view_neural","label":"NeuralNetworkExplorer","kind":"task","group":"tab_neural","description":"Attention visualiser, token probability bars, network diagram — uses live logprobs"},{"id":"neural_micdock","label":"MicDock (floating)","kind":"task","group":"tab_neural","description":"Floating mic button"},{"id":"view_learn","label":"LearningCenter","kind":"task","group":"tab_learn","description":"Educational content explaining how LLMs work, with 'Try asking Nova' CTA"},{"id":"learn_to_assistant","label":"go('assistant') via onAsk()","kind":"tool","group":"tab_learn","description":"onAsk() prop — fires when user clicks 'Ask Nova' in LearningCenter"},{"id":"learn_micdock","label":"MicDock (floating)","kind":"task","group":"tab_learn","description":"Floating mic button"},{"id":"view_settings","label":"ModelSettings","kind":"task","group":"tab_settings","description":"Configure Ollama base URL, model, voice URI, rate, autoSpeak, think mode, pacing"},{"id":"settings_micdock","label":"MicDock (floating)","kind":"task","group":"tab_settings","description":"Floating mic button"}],"transitions":[{"from":"start","to":"tab_decision"},{"from":"tab_decision","to":"view_assistant","label":"assistant"},{"from":"tab_decision","to":"view_pipeline","label":"pipeline"},{"from":"tab_decision","to":"view_neural","label":"neural"},{"from":"tab_decision","to":"view_learn","label":"learn"},{"from":"tab_decision","to":"view_settings","label":"settings"},{"from":"view_assistant","to":"assist_history","label":"history icon"},{"from":"assist_history","to":"view_assistant","label":"close drawer"},{"from":"view_assistant","to":"assist_to_settings","label":"⚙ settings icon / voice settings"},{"from":"assist_to_settings","to":"tab_decision"},{"from":"view_assistant","to":"assist_to_pipeline","label":"Open pipeline / Explore stages"},{"from":"assist_to_pipeline","to":"tab_decision"},{"from":"view_pipeline","to":"pipeline_micdock","label":"mic fab shown"},{"from":"pipeline_micdock","to":"view_pipeline"},{"from":"view_neural","to":"neural_micdock","label":"mic fab shown"},{"from":"neural_micdock","to":"view_neural"},{"from":"view_learn","to":"learn_micdock","label":"mic fab shown"},{"from":"learn_micdock","to":"view_learn"},{"from":"view_learn","to":"learn_to_assistant","label":"Ask Nova →"},{"from":"learn_to_assistant","to":"tab_decision"},{"from":"view_settings","to":"settings_micdock","label":"mic fab shown"},{"from":"settings_micdock","to":"view_settings"}]}</script>
+<script>// Diagrammer viewer runtime: theme, motion, export, zoom/pan, and an inspector that traces
+// upstream/downstream connections. Inlined into every page; reads only the embedded source JSON.
+(function () {
+  'use strict';
+  var root = document.documentElement;
+  var svgs = Array.prototype.slice.call(document.querySelectorAll('svg.dg'));
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage blocked */ } },
+  };
+
+  // ---- Theme -------------------------------------------------------------
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    svgs.forEach(function (s) { s.classList.toggle('dark', t === 'dark'); });
+  }
+  applyTheme(store.get('diagrammer-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  document.getElementById('theme').onclick = function () {
+    var t = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(t);
+    store.set('diagrammer-theme', t);
+  };
+
+  // ---- Motion ------------------------------------------------------------
+  var motionBtn = document.getElementById('motion');
+  function setLive(on) {
+    svgs.forEach(function (s) { s.classList.toggle('live', on); });
+    motionBtn.setAttribute('aria-pressed', String(on));
+    motionBtn.textContent = on ? 'Motion: on' : 'Motion: off';
+  }
+  var m = store.get('diagrammer-motion');
+  setLive(m ? m === 'on' : !matchMedia('(prefers-reduced-motion: reduce)').matches);
+  motionBtn.onclick = function () {
+    var on = motionBtn.getAttribute('aria-pressed') !== 'true';
+    setLive(on);
+    store.set('diagrammer-motion', on ? 'on' : 'off');
+  };
+
+  // ---- Export (first diagram) ---------------------------------------------
+  var svgBtn = document.getElementById('svg'), pngBtn = document.getElementById('png');
+  if (svgs[0] && svgBtn) {
+    var svg0 = svgs[0];
+    var fileName = (document.title || 'diagram').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    var save = function (blob, ext) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName + '.' + ext;
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    };
+    // A clean copy: an image snapshots frame 0, where reveal animations are still invisible.
+    var svgText = function (still) {
+      var c = svg0.cloneNode(true);
+      if (still) c.classList.remove('live');
+      c.classList.remove('has-focus');
+      c.removeAttribute('style');
+      Array.prototype.forEach.call(c.querySelectorAll('[tabindex]'), function (el) {
+        el.removeAttribute('tabindex'); el.removeAttribute('role'); el.removeAttribute('aria-label');
+        el.classList.remove('is-focus', 'is-up', 'is-down');
+      });
+      return new XMLSerializer().serializeToString(c);
+    };
+    svgBtn.onclick = function () { save(new Blob([svgText(false)], { type: 'image/svg+xml' }), 'svg'); };
+    pngBtn.onclick = function () {
+      var img = new Image(), w = svg0.viewBox.baseVal.width, h = svg0.viewBox.baseVal.height;
+      img.onload = function () {
+        var c = document.createElement('canvas');
+        c.width = w * 2; c.height = h * 2;
+        var x = c.getContext('2d');
+        x.scale(2, 2);
+        x.drawImage(img, 0, 0, w, h);
+        c.toBlob(function (b) { save(b, 'png'); });
+      };
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgText(true));
+    };
+  }
+
+  // ---- Zoom and pan --------------------------------------------------------
+  svgs.forEach(function (svg) {
+    var canvas = svg.closest('.canvas');
+    if (!canvas) return;
+    var vb = svg.viewBox.baseVal, natW = vb.width, natH = vb.height, scale = 1;
+    var bar = document.createElement('div');
+    bar.className = 'zoombar';
+    bar.setAttribute('role', 'toolbar');
+    bar.setAttribute('aria-label', 'Zoom');
+    bar.innerHTML = '<button type="button" data-z="out" aria-label="Zoom out">−</button>'
+      + '<span class="zoom-level" aria-live="polite"></span>'
+      + '<button type="button" data-z="in" aria-label="Zoom in">+</button>'
+      + '<button type="button" data-z="fit">Fit</button>'
+      + '<button type="button" data-z="one">100%</button>'
+      + '<span class="zoom-hint">Ctrl/⌘ + scroll to zoom · drag to pan</span>';
+    canvas.parentNode.insertBefore(bar, canvas);
+    var level = bar.querySelector('.zoom-level');
+    var fit = function () { return Math.min(1, (canvas.clientWidth - 18) / natW); };
+    var set = function (s, cx, cy) {
+      var old = scale;
+      scale = Math.max(0.15, Math.min(4, s));
+      // Keep the point under the cursor (or the view centre) in place.
+      var px = cx == null ? canvas.clientWidth / 2 : cx, py = cy == null ? canvas.clientHeight / 2 : cy;
+      var fx = (canvas.scrollLeft + px) / old, fy = (canvas.scrollTop + py) / old;
+      svg.style.width = natW * scale + 'px';
+      svg.style.height = natH * scale + 'px';
+      canvas.scrollLeft = fx * scale - px;
+      canvas.scrollTop = fy * scale - py;
+      level.textContent = Math.round(scale * 100) + '%';
+      canvas.classList.toggle('pannable', canvas.scrollWidth > canvas.clientWidth || canvas.scrollHeight > canvas.clientHeight);
+    };
+    // Default: whole diagram when that stays readable, otherwise 75% and scroll.
+    set(Math.max(fit(), Math.min(1, 0.75)));
+    canvas.scrollLeft = 0;
+    canvas.scrollTop = 0;
+    bar.onclick = function (ev) {
+      var z = ev.target.getAttribute && ev.target.getAttribute('data-z');
+      if (z === 'in') set(scale * 1.25);
+      else if (z === 'out') set(scale / 1.25);
+      else if (z === 'fit') set(fit());
+      else if (z === 'one') set(1);
+    };
+    canvas.addEventListener('wheel', function (ev) {
+      if (!ev.ctrlKey && !ev.metaKey) return;
+      ev.preventDefault();
+      var r = canvas.getBoundingClientRect();
+      set(scale * (ev.deltaY < 0 ? 1.12 : 1 / 1.12), ev.clientX - r.left, ev.clientY - r.top);
+    }, { passive: false });
+    var drag = null;
+    canvas.addEventListener('pointerdown', function (ev) {
+      if (ev.button !== 0 || ev.target.closest('[tabindex]')) return;
+      drag = { x: ev.clientX, y: ev.clientY, l: canvas.scrollLeft, t: canvas.scrollTop, moved: false };
+    });
+    window.addEventListener('pointermove', function (ev) {
+      if (!drag) return;
+      var dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+      if (Math.abs(dx) + Math.abs(dy) > 3) { drag.moved = true; canvas.classList.add('panning'); }
+      canvas.scrollLeft = drag.l - dx;
+      canvas.scrollTop = drag.t - dy;
+    });
+    window.addEventListener('pointerup', function () {
+      if (drag && drag.moved) canvas.dataset.justPanned = '1';
+      drag = null;
+      canvas.classList.remove('panning');
+    });
+  });
+
+  // ---- Models: items and links per diagram, from the embedded source -----------------
+  var source = null;
+  try { source = JSON.parse(document.getElementById('diagram-source').textContent); } catch (e) { return; }
+  var pageType = (document.querySelector('meta[name="diagram-type"]') || {}).content;
+  var diagrams = pageType === 'explainer'
+    ? source.panels.filter(function (p) { return p.kind === 'diagram'; }).map(function (p) { return { type: p.diagram_type, ir: p.diagram }; })
+    : [{ type: pageType, ir: source }];
+
+  var GRAPH = {
+    architecture: ['nodes', 'edges'], workflow: ['steps', 'transitions'], dataflow: ['nodes', 'flows'],
+    lifecycle: ['states', 'transitions'], erd: ['entities', 'relationships'], class: ['classes', 'relations'],
+  };
+  var name = function (it) { return it.label || it.name || it.id || it.at; };
+  var linkLabel = function (l) {
+    return [l.label, l.guard && '[' + l.guard + ']', l.cardinality, l.kind && !l.label ? l.kind : null].filter(Boolean).join(' ');
+  };
+
+  function buildModel(type, ir, svg) {
+    var items = [], links = [], linkEls = [], itemEl, extra = function () { return []; };
+    var byId = function (sel) { return function (it) { return svg.querySelector(sel + '[data-id="' + CSS.escape(it.id) + '"]'); }; };
+    if (GRAPH[type]) {
+      items = ir[GRAPH[type][0]];
+      links = ir[GRAPH[type][1]] || [];
+      linkEls = Array.prototype.slice.call(svg.querySelectorAll('.edge'));
+      itemEl = byId('.node');
+    } else if (type === 'tree') {
+      items = ir.nodes;
+      links = ir.nodes.filter(function (n) { return n.parent !== undefined; }).map(function (n) { return { from: n.parent, to: n.id }; });
+      linkEls = Array.prototype.slice.call(svg.querySelectorAll('.edge'));
+      itemEl = byId('.node');
+    } else if (type === 'sequence') {
+      items = ir.participants.concat(ir.messages.map(function (msg, i) {
+        return { id: '#msg' + i, msg: msg, i: i, label: (i + 1) + '. ' + msg.label, kind: msg.kind || 'sync' };
+      }));
+      links = ir.messages;
+      linkEls = Array.prototype.slice.call(svg.querySelectorAll('.msg'));
+      itemEl = function (it) { return it.msg ? linkEls[it.i] : svg.querySelector('.node[data-id="' + CSS.escape(it.id) + '"]'); };
+    } else if (type === 'waterfall') {
+      items = ir.spans;
+      links = ir.spans.filter(function (s) { return s.parent !== undefined; }).map(function (s) { return { from: s.parent, to: s.id, label: 'contains' }; });
+      itemEl = byId('.span');
+      var total = Math.max.apply(null, ir.spans.map(function (s) { return s.start + s.duration; })) || 1;
+      var unit = ir.meta.unit || 'ms';
+      extra = function (s) {
+        var kids = ir.spans.filter(function (c) { return c.parent === s.id; });
+        var busy = kids.reduce(function (sum, c) { return sum + c.duration; }, 0);
+        return [['Starts', s.start + ' ' + unit], ['Duration', s.duration + ' ' + unit], ['Share of total', Math.round(s.duration / total * 1000) / 10 + '%'],
+          kids.length ? ['Self time', Math.max(0, s.duration - busy) + ' ' + unit + ' (approx.)'] : null, ['Status', s.status || 'ok']];
+      };
+    } else if (type === 'timeline') {
+      items = ir.events.map(function (e, i) { return Object.assign({ id: '#ev' + i, i: i }, e); });
+      itemEl = function (it) { return svg.querySelector('.event[data-i="' + it.i + '"]'); };
+      var lanes = {};
+      (ir.lanes || []).forEach(function (l) { lanes[l.id] = l.label; });
+      extra = function (e) { return [['When', e.at], e.lane ? ['Lane', lanes[e.lane] || e.lane] : null]; };
+    }
+    if (type === 'erd') extra = function (e) {
+      return e.attributes.map(function (a) { return [((a.key || []).join(' ').toUpperCase() + ' ' + a.name).trim(), a.type + (a.nullable ? ' (nullable)' : '') + (a.references ? ' → ' + a.references : '')]; });
+    };
+    if (type === 'class') extra = function (c) {
+      return (c.attributes || []).map(function (a) { return ['Attribute', a]; }).concat((c.methods || []).map(function (x) { return ['Method', x]; }));
+    };
+    if (type === 'sequence') {
+      var who = function (id) { var p = ir.participants.filter(function (x) { return x.id === id; })[0]; return p ? p.label : id; };
+      extra = function (it) { return it.msg ? [['From', who(it.msg.from)], ['To', who(it.msg.to)], ['Step', String(it.i + 1)]] : []; };
+    }
+
+    var groups = {};
+    (ir.groups || []).forEach(function (g) { groups[g.id] = g.label; });
+    var model = { type: type, svg: svg, items: items, links: links, linkEls: linkEls, itemEl: itemEl, extra: extra, groups: groups, byId: {} };
+    items.forEach(function (it) { model.byId[it.id] = it; });
+    return model;
+  }
+
+  // Direct neighbours: links that end at the item (upstream) and links that start at it (downstream).
+  function neighbours(model, it) {
+    var up = [], down = [];
+    if (it.msg) {
+      up.push({ id: it.msg.from, via: 'sends' });
+      down.push({ id: it.msg.to, via: 'receives' });
+      return { up: up, down: down, upLinks: [], downLinks: [] };
+    }
+    var upLinks = [], downLinks = [];
+    model.links.forEach(function (l, i) {
+      // In a sequence the neighbour is the message itself, whose name already carries the label.
+      var target = model.type === 'sequence' ? '#msg' + i : null;
+      var via = target ? '' : linkLabel(l);
+      if (l.to === it.id) { upLinks.push(i); up.push({ id: target || l.from, via: via }); }
+      if (l.from === it.id) { downLinks.push(i); down.push({ id: target || l.to, via: via }); }
+    });
+    return { up: up, down: down, upLinks: upLinks, downLinks: downLinks };
+  }
+
+  // ---- Inspector panel -------------------------------------------------------
+  var panel = document.createElement('aside');
+  panel.className = 'inspector';
+  panel.setAttribute('aria-live', 'polite');
+  panel.setAttribute('aria-label', 'Details');
+  panel.hidden = true;
+  document.body.appendChild(panel);
+  var active = null; // { model, item, pinned }
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  function clear(model) {
+    model.svg.classList.remove('has-focus');
+    Array.prototype.forEach.call(model.svg.querySelectorAll('.is-focus,.is-up,.is-down'), function (el) {
+      el.classList.remove('is-focus', 'is-up', 'is-down');
+    });
+  }
+
+  function show(model, it, pinned) {
+    if (active) clear(active.model);
+    active = { model: model, item: it, pinned: pinned };
+    var nb = neighbours(model, it);
+    var mark = function (el, cls) { if (el) el.classList.add(cls); };
+    model.svg.classList.add('has-focus');
+    mark(model.itemEl(it), 'is-focus');
+    nb.upLinks.forEach(function (i) { mark(model.linkEls[i], 'is-up'); });
+    nb.downLinks.forEach(function (i) { mark(model.linkEls[i], 'is-down'); });
+    nb.up.forEach(function (n) { if (model.byId[n.id]) mark(model.itemEl(model.byId[n.id]), 'is-up'); });
+    nb.down.forEach(function (n) { if (model.byId[n.id]) mark(model.itemEl(model.byId[n.id]), 'is-down'); });
+
+    var rows = [['Kind', it.kind || (it.msg ? 'message' : '')], it.group ? ['Group', model.groups[it.group] || it.group] : null,
+      it.parent && model.type === 'tree' ? ['Parent', name(model.byId[it.parent] || { id: it.parent })] : null]
+      .concat(model.extra(it)).filter(function (r) { return r && r[1]; });
+    var list = function (title, cls, xs) {
+      if (!xs.length) return '<h3>' + title + ' <span class="count">0</span></h3><p class="none">None</p>';
+      return '<h3>' + title + ' <span class="count">' + xs.length + '</span></h3><ul class="' + cls + '">'
+        + xs.map(function (n) {
+          var target = model.byId[n.id];
+          return '<li><button type="button" data-goto="' + esc(n.id) + '">' + esc(target ? name(target) : n.id) + '</button>'
+            + (n.via ? ' <span class="via">' + esc(n.via) + '</span>' : '') + '</li>';
+        }).join('') + '</ul>';
+    };
+    var connected = model.type !== 'timeline';
+    panel.innerHTML = '<div class="insp-head"><strong>' + esc(name(it)) + '</strong>'
+      + '<button type="button" class="insp-close" aria-label="Close details">×</button></div>'
+      + (it.description ? '<p class="desc">' + esc(it.description) + '</p>' : '')
+      + (rows.length ? '<dl>' + rows.map(function (r) { return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('') + '</dl>' : '')
+      + (connected ? list('Upstream · incoming', 'up', nb.up) + list('Downstream · outgoing', 'down', nb.down) : '')
+      + '<p class="insp-hint">' + (pinned ? 'Pinned. Esc or × to close.' : 'Click or press Enter to pin.') + '</p>';
+    panel.hidden = false;
+    panel.classList.toggle('pinned', pinned);
+    panel.querySelector('.insp-close').onclick = function () { hide(true); };
+    Array.prototype.forEach.call(panel.querySelectorAll('[data-goto]'), function (b) {
+      b.onclick = function () {
+        var target = model.byId[b.getAttribute('data-goto')];
+        var el = target && model.itemEl(target);
+        if (!el) return;
+        show(model, target, true);
+        el.scrollIntoView({ block: 'center', inline: 'center' });
+        el.focus({ preventScroll: true });
+      };
+    });
+  }
+
+  function hide(force) {
+    if (!active || (active.pinned && !force)) return;
+    var el = force && active.model.itemEl(active.item);
+    clear(active.model);
+    active = null;
+    panel.hidden = true;
+    if (el && document.activeElement && panel.contains(document.activeElement)) el.focus({ preventScroll: true });
+  }
+
+  // ---- Wire items: hover, focus, click, keyboard ------------------------------------------
+  diagrams.forEach(function (d, k) {
+    var svg = svgs[k];
+    if (!svg || !d.ir) return;
+    var model = buildModel(d.type, d.ir, svg);
+    svg.setAttribute('role', 'group');
+    model.items.forEach(function (it) {
+      var el = model.itemEl(it);
+      if (!el) return;
+      // The renderer applies default kinds; read them back from the k-* class so labels name them.
+      if (!it.kind) { var k = /\bk-([\w-]+)/.exec(el.getAttribute('class')); if (k) it.kind = k[1]; }
+      var nb = neighbours(model, it);
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('role', 'button');
+      el.setAttribute('aria-label', [it.kind, name(it)].filter(Boolean).join(' ')
+        + (model.type === 'timeline' ? '' : ', ' + nb.up.length + ' upstream, ' + nb.down.length + ' downstream'));
+      el.addEventListener('pointerenter', function () { if (!active || !active.pinned) show(model, it, false); });
+      el.addEventListener('pointerleave', function () { hide(false); });
+      // Keyboard focus only; a mouse click focuses too and is handled by the click listener.
+      el.addEventListener('focus', function () {
+        if (el.matches(':focus-visible') && (!active || active.item !== it)) show(model, it, active ? active.pinned : false);
+      });
+      // From the keyboard, pinning moves focus into the panel; Esc (hide) returns it to the item.
+      var toggle = function (fromKey) {
+        if (active && active.item === it && active.pinned) return hide(true);
+        show(model, it, true);
+        if (fromKey) (panel.querySelector('[data-goto]') || panel.querySelector('.insp-close')).focus();
+      };
+      el.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        var canvas = svg.closest('.canvas');
+        if (canvas && canvas.dataset.justPanned) { delete canvas.dataset.justPanned; return; }
+        toggle();
+      });
+      // SVG elements have no .click(), so keys call the toggle directly.
+      el.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); toggle(true); }
+      });
+    });
+    svg.addEventListener('click', function () {
+      var canvas = svg.closest('.canvas');
+      if (canvas && canvas.dataset.justPanned) { delete canvas.dataset.justPanned; return; }
+      hide(true);
+    });
+  });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') hide(true); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "generator": "diagrammer 0.5.0",
+  "type": "architecture",
+  "work_dir": "/Users/vinodh/dev/mfe_starter_pack/.diagrams/architecture-nova-voice-ai-learning-assistant-20261103-164752",
+  "candidate": "/Users/vinodh/dev/mfe_starter_pack/.diagrams/architecture-nova-voice-ai-learning-assistant-20261103-164752/candidate.json",
+  "gates": {
+    "validate": "pass",
+    "render": "pass",
+    "check": "pass"
+  },
+  "artifact": {
+    "path": "/Users/vinodh/dev/kiro_apps/nova_voice_assistant/nova-architecture.html",
+    "sha256": "2b2e02fab12516f0f284947bd8589f43dd18e58e2fd2ab21e3335c2fc473e8ed",
+    "bytes": 38579
+  },
+  "diagnostics": []
+}

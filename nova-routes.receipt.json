@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "generator": "diagrammer 0.6.0",
+  "type": "workflow",
+  "work_dir": "/Users/vinodh/dev/mfe_starter_pack/.diagrams/workflow-nova-voice-assistant-route-navigation-20261103-172601",
+  "candidate": "/Users/vinodh/dev/mfe_starter_pack/.diagrams/workflow-nova-voice-assistant-route-navigation-20261103-172601/candidate.json",
+  "gates": {
+    "validate": "pass",
+    "render": "pass",
+    "check": "pass"
+  },
+  "artifact": {
+    "path": "/Users/vinodh/dev/kiro_apps/nova_voice_assistant/nova-routes.html",
+    "sha256": "1f3fcb5e2c83ce4d62495913aab6dd0c8ec03846463fe471ae1aa51185bd95ed",
+    "bytes": 52373
+  },
+  "diagnostics": [
+    {
+      "severity": "warning",
+      "code": "no-end",
+      "path": "$.steps",
+      "message": "no step of kind \"end\""
+    }
+  ]
+}
