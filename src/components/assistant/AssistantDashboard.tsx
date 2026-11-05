@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react'
 import { useState } from 'react'
 import { useAssistant } from '../../state/AssistantContext'
 import { PipelineStepper } from '../pipeline/ProcessingPipeline'
+import { ParticleVoice } from '../ui/ParticleVoice'
 import { AssistantHeader, Composer, HistoryDrawer, RequestTrace, ResponseCard, StatusPill, Suggestions, TranscriptCard } from './parts'
 import type { Tab } from '../layout/AppShell'
 
@@ -24,6 +25,9 @@ export function AssistantDashboard({ go }: { go: (t: Tab) => void }) {
         {/* On mobile the trace sits between request and answer, as in the Figma frame. */}
         <motion.div variants={rise} className="lg:hidden">
           <RequestTrace onOpenPipeline={() => go('pipeline')} />
+        </motion.div>
+        <motion.div variants={rise}>
+          <ParticleVoice className="h-[240px] lg:h-[360px]" />
         </motion.div>
         <motion.div variants={rise} className="pt-1">
           <ResponseCard />

@@ -5,6 +5,7 @@ import { useAssistant } from '../../state/AssistantContext'
 import { mostUncertain, ns } from '../../lib/ollama'
 import { showToken } from '../../lib/text'
 import { AudioWaveform } from '../ui/AudioWaveform'
+import { ParticleVoice } from '../ui/ParticleVoice'
 import { Chip, SourceBadge, Stat } from '../ui/primitives'
 import { NeuralNetworkVisualizer } from '../neural/NeuralNetworkVisualizer'
 import { NextTokenBars } from '../neural/NextTokenBars'
@@ -216,7 +217,7 @@ export function TextToSpeechStage() {
         <span className="text-white">{text.slice(0, spoken)}</span>
         <span className="text-muted/60">{text.slice(spoken)}</span>
       </p>
-      <AudioWaveform active={stage === 7} height={36} colors={['#ff6bd5', '#dcebff']} />
+      <ParticleVoice height={140} />
       <div className="h-1 overflow-hidden rounded-full bg-bg/70">
         <motion.div className="h-full bg-gradient-to-r from-glow-violet to-glow-pink" animate={{ width: `${(spoken / text.length) * 100}%` }} />
       </div>
