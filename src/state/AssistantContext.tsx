@@ -157,6 +157,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   messagesRef.current = messages
   const modelInfoRef = useRef(modelInfo)
   modelInfoRef.current = modelInfo
+  const connectionRef = useRef(connection)
+  connectionRef.current = connection
 
   // Keep the last 50 messages across reloads; the per-turn trace is too large to store.
   useEffect(() => {
@@ -250,7 +252,15 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       const s = settingsRef.current
       const live = () => runId === runIdRef.current
       const pace = (ms: number) => (s.pacing ? wait(ms) : Promise.resolve())
-      if (!s.model) return fail('No Ollama model selected. Open Model Settings to choose one.')
+      const unreachable = `Can't reach Ollama at ${s.base}. Make sure it is running; Model Settings has setup help.`
+      // Show the question even when we stop early, so the user sees what failed.
+      setTurn({ ...base, raw: text })
+      if (!s.model) {
+        setStage(-1)
+        if (connectionRef.current === 'online') return fail('No Ollama model selected. Open Model Settings to choose one.')
+        refreshModels()
+        return fail(unreachable)
+      }
 
       setError('')
       const history = messagesRef.current
@@ -317,10 +327,15 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         }
       } catch (e) {
         if (controller.signal.aborted || !live()) return
+        // fetch() rejects with TypeError when the server can't be reached at all.
+        if (e instanceof TypeError) {
+          setConnection('offline')
+          return fail(unreachable)
+        }
         fail(e instanceof Error ? `Ollama error: ${e.message}` : String(e))
       }
     },
-    [fail, speakText],
+    [fail, speakText, refreshModels],
   )
 
   const startListening = useCallback(() => {
