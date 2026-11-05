@@ -112,6 +112,14 @@ function loadSettings(): Settings {
   }
 }
 
+function loadMessages(): Message[] {
+  try {
+    return JSON.parse(localStorage.getItem('nova.messages') ?? '[]')
+  } catch {
+    return []
+  }
+}
+
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 const emptyTurn = (source: Turn['source']): Turn => ({
   source,
@@ -134,7 +142,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<Status>('idle')
   const [stage, setStage] = useState(-1)
   const [turn, setTurn] = useState<Turn | null>(null)
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<Message[]>(loadMessages)
   const [error, setError] = useState('')
   const [speakingId, setSpeakingId] = useState<number | null>(null)
   const [paused, setPaused] = useState(false)
@@ -149,6 +157,15 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   messagesRef.current = messages
   const modelInfoRef = useRef(modelInfo)
   modelInfoRef.current = modelInfo
+
+  // Keep the last 50 messages across reloads; the per-turn trace is too large to store.
+  useEffect(() => {
+    try {
+      localStorage.setItem('nova.messages', JSON.stringify(messages.slice(-50).map(({ turn: _turn, ...m }) => m)))
+    } catch {
+      /* storage full or unavailable: history just won't persist */
+    }
+  }, [messages])
 
   const updateSettings = useCallback((patch: Partial<Settings>) => {
     setSettings((s) => {
