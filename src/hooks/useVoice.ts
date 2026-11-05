@@ -160,17 +160,43 @@ export function speak(text: string, { voiceURI, rate = 1, onStart, onProgress, o
   const voice = speechSynthesis.getVoices().find((v) => v.voiceURI === voiceURI)
   const chunks = text.match(/[^.!?]+[.!?]*\s*/g) ?? [text]
   let offset = 0
+  let started = false
+  let finished = false
+  const finish = () => {
+    if (finished) return
+    finished = true
+    clearTimeout(watchdog)
+    onEnd?.()
+  }
+  // Some browsers (no voices, headless) never fire start or error; don't wait forever.
+  const watchdog = setTimeout(() => {
+    if (!started) {
+      speechSynthesis.cancel()
+      finish()
+    }
+  }, 5000)
   chunks.forEach((chunk, i) => {
     const u = new SpeechSynthesisUtterance(chunk)
     if (voice) u.voice = voice
     u.rate = rate
     const base = offset
     offset += chunk.length
-    if (i === 0) u.onstart = () => onStart?.()
+    u.onstart = () => {
+      started = true
+      if (i === 0) onStart?.()
+    }
     u.onboundary = (e) => onProgress?.(base + e.charIndex)
     u.onend = () => {
       onProgress?.(base + chunk.length)
-      if (i === chunks.length - 1) onEnd?.()
+      if (i === chunks.length - 1) finish()
+    }
+    // A failed chunk would leave later chunks and the caller waiting, so stop the whole reply.
+    u.onerror = (e) => {
+      // Our own cancel() (Stop, or a newer reply) reports these; cancelling again would kill the newer speech.
+      if (e.error === 'interrupted' || e.error === 'canceled') return finish()
+      speechSynthesis.cancel()
+      onProgress?.(text.length)
+      finish()
     }
     speechSynthesis.speak(u)
   })
