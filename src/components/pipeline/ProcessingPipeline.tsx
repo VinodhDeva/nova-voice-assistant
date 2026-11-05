@@ -8,12 +8,15 @@ import { Learn } from '../ui/primitives'
 
 export const STAGE_ICONS = [Mic, AudioLines, FileText, Puzzle, Brain, Sparkles, Type, Speaker]
 
-type StageState = 'pending' | 'active' | 'done'
-export const stageState = (i: number, stage: number): StageState => (stage === i ? 'active' : stage > i ? 'done' : 'pending')
+type StageState = 'pending' | 'active' | 'done' | 'skipped'
+/** Typed questions never pass through voice input (0) or speech-to-text (1). */
+export const stageState = (i: number, stage: number, typed = false): StageState =>
+  typed && i < 2 && stage >= 2 ? 'skipped' : stage === i ? 'active' : stage > i ? 'done' : 'pending'
 
 /** Horizontal stepper: VOICE → … → AUDIO, with a fill bar that follows the live stage. */
 export function PipelineStepper({ onPick, compact = false }: { onPick?: (i: number) => void; compact?: boolean }) {
-  const { stage } = useAssistant()
+  const { stage, turn } = useAssistant()
+  const typed = turn?.source === 'text'
   const progress = stage < 0 ? 0 : Math.min(stage, 7) / 7
   return (
     <div className="relative">
@@ -21,7 +24,7 @@ export function PipelineStepper({ onPick, compact = false }: { onPick?: (i: numb
       <motion.div className="absolute top-5 left-5 h-px origin-left bg-gradient-to-r from-glow-blue via-glow-violet to-glow-pink" style={{ right: 20 }} animate={{ scaleX: progress }} transition={{ type: 'spring', bounce: 0, duration: 0.8 }} />
       <ol className="relative flex justify-between">
         {STAGES.map((name, i) => {
-          const st = stageState(i, stage)
+          const st = stageState(i, stage, typed)
           const Icon = STAGE_ICONS[i]
           return (
             <li key={name} className="flex w-10 flex-col items-center gap-1.5">
@@ -29,20 +32,20 @@ export function PipelineStepper({ onPick, compact = false }: { onPick?: (i: numb
                 onClick={() => onPick?.(i)}
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.94 }}
-                className="relative grid size-10 place-items-center rounded-full border"
+                className={`relative grid size-10 place-items-center rounded-full border ${st === 'skipped' ? 'border-dashed opacity-60' : ''}`}
                 animate={{
-                  borderColor: st === 'pending' ? 'rgba(102,102,109,0.8)' : 'rgba(220,235,255,0.9)',
+                  borderColor: st === 'pending' || st === 'skipped' ? 'rgba(102,102,109,0.8)' : 'rgba(220,235,255,0.9)',
                   backgroundColor: st === 'active' ? 'rgba(220,235,255,0.95)' : st === 'done' ? 'rgba(74,74,80,1)' : 'rgba(36,37,42,1)',
                   color: st === 'active' ? '#18191d' : st === 'done' ? '#dcebff' : '#b8bbc2',
                 }}
-                aria-label={name}
+                aria-label={st === 'skipped' ? `${name} (skipped)` : name}
               >
                 {st === 'done' ? <Check size={15} /> : <Icon size={15} />}
                 {st === 'active' && (
                   <motion.span className="absolute inset-0 rounded-full border-2 border-accent" animate={{ scale: [1, 1.6], opacity: [0.8, 0] }} transition={{ repeat: Infinity, duration: 1.4 }} />
                 )}
               </motion.button>
-              {!compact && <span className={`hidden w-16 text-center text-[9px] leading-tight md:block ${st === 'pending' ? 'text-muted' : 'text-white'}`}>{name}</span>}
+              {!compact && <span className={`hidden w-16 text-center text-[9px] leading-tight md:block ${st === 'pending' || st === 'skipped' ? 'text-muted' : 'text-white'}`}>{name}</span>}
             </li>
           )
         })}
@@ -52,8 +55,8 @@ export function PipelineStepper({ onPick, compact = false }: { onPick?: (i: numb
 }
 
 export function PipelineStage({ index }: { index: number }) {
-  const { stage } = useAssistant()
-  const st = stageState(index, stage)
+  const { stage, turn } = useAssistant()
+  const st = stageState(index, stage, turn?.source === 'text')
   const View = STAGE_VIEWS[index]
   const lesson = STAGE_LESSONS[index]
   const Icon = STAGE_ICONS[index]
