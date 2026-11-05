@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { AlertTriangle, AudioLines, Check, CircleCheck, Cpu, History, Keyboard, Mic, Pause, Pencil, Play, Send, ShieldCheck, SlidersHorizontal, Square, Trash2, Workflow, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAssistant, type Status } from '../../state/AssistantContext'
 import { ns } from '../../lib/ollama'
 import { speechRecognitionSupported } from '../../hooks/useVoice'
@@ -408,6 +408,24 @@ function SmallRound({ label, onClick, children, active = false }: { label: strin
 
 export function HistoryDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { messages, clear, speakMessage } = useAssistant()
+
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose
+  const closeButton = useRef<HTMLButtonElement>(null)
+
+  // Escape closes the dialog; focus returns to whatever opened it.
+  useEffect(() => {
+    if (!open) return
+    const opener = document.activeElement as HTMLElement | null
+    closeButton.current?.focus()
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeRef.current()
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      opener?.focus()
+    }
+  }, [open])
+
   return (
     <AnimatePresence>
       {open && (
@@ -416,6 +434,7 @@ export function HistoryDrawer({ open, onClose }: { open: boolean; onClose: () =>
           <motion.aside
             key="drawer"
             role="dialog"
+            aria-modal="true"
             aria-label="Conversation history"
             className="glass fixed top-0 right-0 bottom-0 z-50 flex w-full max-w-md flex-col rounded-l-[24px] bg-bg/90"
             initial={{ x: '100%' }}
@@ -431,7 +450,7 @@ export function HistoryDrawer({ open, onClose }: { open: boolean; onClose: () =>
                 <button disabled={!messages.length} onClick={clear} className="flex items-center gap-1 rounded-lg border border-line px-2.5 py-1.5 text-[11px] text-muted hover:text-err disabled:opacity-40">
                   <Trash2 size={13} /> Clear
                 </button>
-                <button onClick={onClose} aria-label="Close" className="grid size-8 place-items-center rounded-lg border border-line">
+                <button ref={closeButton} onClick={onClose} aria-label="Close" className="grid size-8 place-items-center rounded-lg border border-line">
                   <X size={16} />
                 </button>
               </div>
